@@ -29,15 +29,23 @@
 		31455E662E94F00D00B8F1F8 /* AISmartActionAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AISmartActionAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		31455E862E95372800B8F1F8 /* Exceptions for "AISmartActionApp" folder in "AISmartActionApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 31455E4E2E94F00A00B8F1F8 /* AISmartActionApp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		31455E512E94F00A00B8F1F8 /* AISmartActionApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				31455E862E95372800B8F1F8 /* Exceptions for "AISmartActionApp" folder in "AISmartActionApp" target */,
+			);
 			path = AISmartActionApp;
-			sourceTree = "<group>";
-		};
-		31455E5F2E94F00D00B8F1F8 /* AISmartActionAppTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AISmartActionAppTests;
 			sourceTree = "<group>";
 		};
 		31455E692E94F00D00B8F1F8 /* AISmartActionAppUITests */ = {
@@ -76,7 +84,6 @@
 			isa = PBXGroup;
 			children = (
 				31455E512E94F00A00B8F1F8 /* AISmartActionApp */,
-				31455E5F2E94F00D00B8F1F8 /* AISmartActionAppTests */,
 				31455E692E94F00D00B8F1F8 /* AISmartActionAppUITests */,
 				31455E502E94F00A00B8F1F8 /* Products */,
 			);
@@ -129,9 +136,6 @@
 			);
 			dependencies = (
 				31455E5E2E94F00D00B8F1F8 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				31455E5F2E94F00D00B8F1F8 /* AISmartActionAppTests */,
 			);
 			name = AISmartActionAppTests;
 			packageProductDependencies = (
@@ -400,6 +404,11 @@
 				DEVELOPMENT_TEAM = FXWFJ2FXV9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AISmartActionApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "ヨミトリ";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "カレンダーにイベントを登録するために必要です";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "カレンダーにイベントを登録するために必要です";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "画像からテキストを抽出するために写真ライブラリへのアクセスが必要です。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -432,6 +441,11 @@
 				DEVELOPMENT_TEAM = FXWFJ2FXV9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AISmartActionApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "ヨミトリ";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "カレンダーにイベントを登録するために必要です";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "カレンダーにイベントを登録するために必要です";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "画像からテキストを抽出するために写真ライブラリへのアクセスが必要です。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>comgooglemaps</string>
+    </array>
+    <key>NSCalendarsFullAccessUsageDescription</key>
+    <string>認識された情報をカレンダーに登録するために、カレンダーへのアクセス許可が必要です。</string>
+    <key>NSContactsUsageDescription</key>
+    <string>認識された連絡先情報を登録するために、連絡先へのアクセス許可が必要です。</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>写真ライブラリから画像を読み込んでテキストを認識するために、写真ライブラリへのアクセス許可が必要です。</string>
+</dict>
+</plist>
