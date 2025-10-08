@@ -42,28 +42,6 @@ class LLMService {
         let actions = parseLLMOutput(rawOutput)
         return (rawOutput, actions)
     }
-
-    /// 対話を通じてカレンダーイベントを調整する
-    func adjustCalendarEvent(action: ProposedAction, conversationHistory: [ChatMessage], userInput: String) async throws -> (response: String, updatedAction: ProposedAction) {
-        guard SystemLanguageModel.default.availability == .available else {
-            throw LLMError.modelNotAvailable
-        }
-        
-        let prompt = PromptFactory.createChatPrompt(
-            action: action,
-            conversationHistory: conversationHistory,
-            userInput: userInput
-        )
-        
-        var response = ""
-        let stream = try await session.streamResponse(to: prompt)
-        for try await chunk in stream {
-            response = chunk.content
-        }
-        
-        let updatedAction = updateActionFromAIResponse(response, originalAction: action)
-        return (response, updatedAction)
-    }
     
     /// LLMからの文字列出力を解析して、アクションのリストに変換する
     private func parseLLMOutput(_ output: String) -> [ProposedAction] {
@@ -73,21 +51,28 @@ class LLMService {
         for line in lines {
             let lineStr = String(line).trimmingCharacters(in: .whitespaces)
             
-            // 行頭の「- 」を考慮したパース
             if lineStr.contains("カレンダー登録:") {
                 let cleaned = lineStr.replacingOccurrences(of: "^-\\s*", with: "", options: .regularExpression)
                 let components = cleaned.replacingOccurrences(of: "カレンダー登録:", with: "").components(separatedBy: ";")
                 
                 let title = components.first?.trimmingCharacters(in: .whitespaces) ?? ""
-                var date: Date? = nil
+                var startDate: Date? = nil
+                var endDate: Date? = nil
                 
                 if components.count > 1 {
-                    let dateString = components[1].trimmingCharacters(in: .whitespaces)
-                    date = DateParser.parseDate(from: dateString)
-                    if date == nil { print("⚠️ [Parser] 日付のパースに失敗: '\(dateString)'") }
+                    let startDateString = components[1].trimmingCharacters(in: .whitespaces)
+                    startDate = DateParser.parseDate(from: startDateString)
+                    if startDate == nil { print("⚠️ [Parser] 開始日時のパースに失敗: '\(startDateString)'") }
                 }
+
+                if components.count > 2 {
+                    let endDateString = components[2].trimmingCharacters(in: .whitespaces)
+                    endDate = DateParser.parseDate(from: endDateString)
+                    if endDate == nil { print("⚠️ [Parser] 終了日時のパースに失敗: '\(endDateString)'") }
+                }
+
                 if !title.isEmpty {
-                    actions.append(ProposedAction(type: .addCalendarEvent, value: title, date: date))
+                    actions.append(ProposedAction(type: .addCalendarEvent, value: title, date: startDate, endDate: endDate))
                 }
                 
             } else if lineStr.contains("経路検索:") {
@@ -125,36 +110,16 @@ class LLMService {
                 if !value.isEmpty {
                     actions.append(ProposedAction(type: .call, value: value))
                 }
+            } else if lineStr.contains("メモに追加:") {
+                let value = lineStr.replacingOccurrences(of: "^-\\s*", with: "", options: .regularExpression)
+                    .replacingOccurrences(of: "メモに追加:", with: "")
+                    .trimmingCharacters(in: .whitespaces)
+                if !value.isEmpty {
+                    actions.append(ProposedAction(type: .addNote, value: value))
+                }
             }
         }
         return actions
-    }
-    
-    /// AIの応答から変更内容を抽出し、アクションを更新する
-    private func updateActionFromAIResponse(_ response: String, originalAction: ProposedAction) -> ProposedAction {
-        var action = originalAction
-        
-        if let changeStart = response.range(of: "[変更内容]") {
-            let changeSection = String(response[changeStart.upperBound...])
-            let lines = changeSection.split(separator: "\n")
-            
-            for line in lines {
-                let lineStr = String(line).trimmingCharacters(in: .whitespaces)
-                
-                if lineStr.hasPrefix("イベント名:") {
-                    let newTitle = lineStr.replacingOccurrences(of: "イベント名:", with: "").trimmingCharacters(in: .whitespaces)
-                    if !newTitle.isEmpty { action.value = newTitle }
-                }
-                
-                if lineStr.hasPrefix("日時:") {
-                    let dateString = lineStr.replacingOccurrences(of: "日時:", with: "").trimmingCharacters(in: .whitespaces)
-                    if let date = DateParser.parseDate(from: dateString) {
-                        action.date = date
-                    }
-                }
-            }
-        }
-        return action
     }
 
     /// LLM関連のエラーを定義
@@ -174,7 +139,6 @@ struct DateParser {
         let trimmed = string.trimmingCharacters(in: .whitespaces)
         guard let japanTimeZone = TimeZone(identifier: "Asia/Tokyo") else { return nil }
         
-        // 試行する日付フォーマットのリスト
         let formatters: [DateFormatter] = [
             {
                 let formatter = DateFormatter()
@@ -206,10 +170,8 @@ struct DateParser {
             }()
         ]
         
-        // 各フォーマットを順番に試す
         for formatter in formatters {
             if let date = formatter.date(from: trimmed) {
-                // 日付のみのフォーマットの場合、デフォルトで10:00を設定
                 if formatter.dateFormat == "yyyy-MM-dd" {
                     var calendar = Calendar.current
                     calendar.timeZone = japanTimeZone
@@ -221,3 +183,4 @@ struct DateParser {
         return nil
     }
 }
+

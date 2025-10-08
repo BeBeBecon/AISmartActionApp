@@ -4,29 +4,31 @@ import Foundation
 // ----------------------------------
 // LLMからの提案を構造化して扱うためのデータ型
 // ----------------------------------
-struct ProposedAction: Hashable, Identifiable { // Identifiableに準拠
-    let id = UUID() // リスト表示のためにユニークなIDを追加
+struct ProposedAction: Hashable, Identifiable {
+    let id = UUID()
     var type: ActionType
-    var value: String // チャット中に更新可能にするため var に変更
-    var secondaryValue: String? // チャット中に更新可能にするため var に変更
-    var tertiaryValue: String? // チャット中に更新可能にするため var に変更
-    var date: Date? // チャット中に更新可能にするため var に変更
+    var value: String          // メインの値 (イベント名、場所など)
+    var secondaryValue: String?  // 補助的な値 (電話番号など)
+    var tertiaryValue: String?   // 補助的な値その2 (メールアドレス、メモなど)
+    var date: Date?            // 開始日時
+    var endDate: Date?         // 終了日時
     
-    init(type: ActionType, value: String, secondaryValue: String? = nil, tertiaryValue: String? = nil, date: Date? = nil) {
+    init(type: ActionType, value: String, secondaryValue: String? = nil, tertiaryValue: String? = nil, date: Date? = nil, endDate: Date? = nil) {
         self.type = type
         self.value = value
         self.secondaryValue = secondaryValue
         self.tertiaryValue = tertiaryValue
         self.date = date
+        self.endDate = endDate
     }
     
-    // ActionTypeとsystemImageNameは変更なし
     enum ActionType: String {
         case addCalendarEvent = "カレンダー登録"
         case searchMap = "経路検索"
         case addContact = "連絡先登録"
         case openURL = "URLを開く"
         case call = "電話をかける"
+        case addNote = "メモに追加"
         case unknown = "不明"
     }
     
@@ -37,23 +39,9 @@ struct ProposedAction: Hashable, Identifiable { // Identifiableに準拠
         case .addContact: "person.crop.circle.badge.plus"
         case .openURL: "safari.fill"
         case .call: "phone.fill"
+        case .addNote: "note.text.badge.plus"
         case .unknown: "questionmark.circle"
         }
     }
 }
 
-
-// MARK: - ChatMessage
-// ----------------------------------
-// AIとのチャットのやり取りを管理するためのデータ構造
-// ----------------------------------
-struct ChatMessage: Identifiable, Hashable {
-    let id = UUID()
-    let role: ChatRole // 発言者がユーザーなのかAIなのか
-    let content: String // 発言内容
-    
-    enum ChatRole {
-        case user  // ユーザーからのメッセージ
-        case model // AIからの応答
-    }
-}

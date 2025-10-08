@@ -13,10 +13,7 @@ class ActionExecutionService {
     private let contactsService = ContactsService()
 
     /// どのアクションを実行するかを決定し、適切なメソッドを呼び出す
-    func execute(_ action: ProposedAction) {
-        // ---------------------------------------------------------
-        // ▼ 他アプリを起動するための「命令」としてのインテント ▼
-        // ---------------------------------------------------------
+    func execute(_ action: ProposedAction, summary: String? = nil) {
         switch action.type {
         case .addCalendarEvent:
             executeCalendarAction(action)
@@ -28,6 +25,8 @@ class ActionExecutionService {
             executeOpenURLAction(action)
         case .call:
             executeCallAction(action)
+        case .addNote:
+            executeAddNoteAction(summary: summary)
         case .unknown:
             print("⚠️ 不明なアクションです。")
         }
@@ -45,17 +44,15 @@ class ActionExecutionService {
 
     /// カレンダー登録処理を実行する
     private func executeCalendarAction(_ action: ProposedAction) {
-        // チャットシートが閉じるアニメーションと競合しないように、わずかに遅延させて実行する
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             guard let vc = self.rootViewController else { return }
-            print("📅 カレンダー登録を実行: \(action.value)")
-            if let date = action.date {
-                print("   日時: \(date)")
-            } else {
-                print("   ⚠️ 警告: 日時が設定されていません")
-            }
-                    
-            self.calendarService.addEvent(title: action.value, date: action.date, from: vc)
+            self.calendarService.addEvent(
+                title: action.value,
+                date: action.date,
+                endDate: action.endDate,
+                notes: action.tertiaryValue,
+                from: vc
+            )
         }
     }
 
@@ -68,11 +65,9 @@ class ActionExecutionService {
     /// マップでの経路検索を実行する
     private func executeSearchMapAction(_ action: ProposedAction) {
         guard let query = action.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return }
-        // Googleマップアプリがインストールされていれば優先的に使用
         if let googleMapsUrl = URL(string: "comgooglemaps://?q=\(query)"), UIApplication.shared.canOpenURL(googleMapsUrl) {
             UIApplication.shared.open(googleMapsUrl)
         } else if let appleMapsUrl = URL(string: "http://maps.apple.com/?q=\(query)") {
-            // なければ標準のマップアプリを使用
             UIApplication.shared.open(appleMapsUrl)
         }
     }
@@ -86,10 +81,28 @@ class ActionExecutionService {
 
     /// 電話を発信する
     private func executeCallAction(_ action: ProposedAction) {
-        // 電話番号から数字のみを抽出
         let filteredPhoneNumber = action.value.filter("0123456789".contains)
         if let url = URL(string: "tel://\(filteredPhoneNumber)") {
             UIApplication.shared.open(url)
         }
     }
+    
+    /// 【新規追加】メモアプリに要約内容を共有する
+    private func executeAddNoteAction(summary: String?) {
+        guard let summaryText = summary, !summaryText.isEmpty, let vc = rootViewController else { return }
+        
+        // OS標準の共有シートを作成
+        let activityVC = UIActivityViewController(activityItems: [summaryText], applicationActivities: nil)
+        
+        // iPadでの表示崩れを防ぐための設定
+        if let popoverController = activityVC.popoverPresentationController {
+            popoverController.sourceView = vc.view
+            popoverController.sourceRect = CGRect(x: vc.view.bounds.midX, y: vc.view.bounds.midY, width: 0, height: 0)
+            popoverController.permittedArrowDirections = []
+        }
+        
+        // 共有シートを表示
+        vc.present(activityVC, animated: true, completion: nil)
+    }
 }
+
